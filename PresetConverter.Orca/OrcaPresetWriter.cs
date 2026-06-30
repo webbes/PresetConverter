@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -10,7 +11,6 @@ internal sealed class OrcaPresetWriter(
     IOptions<OrcaPresetWriterOptions> options,
     ILogger<OrcaPresetWriter> log) : IPresetWriter
 {
-    private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private readonly OrcaPresetWriterOptions _options = options.Value;
     private readonly ILogger<OrcaPresetWriter> _log = log;
 
@@ -80,7 +80,7 @@ internal sealed class OrcaPresetWriter(
         var ordered = json.OrderBy(kvp => kvp.Key, StringComparer.Ordinal)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value, StringComparer.Ordinal);
 
-        File.WriteAllText(outputFile, JsonSerializer.Serialize(ordered, JsonOptions));
+        File.WriteAllText(outputFile, SerializeJsonObject(ordered));
         activity?.SetTag("preset.output", outputFile);
         OrcaTelemetry.PresetsWritten.Add(1, KeyValuePair.Create<string, object?>("preset.kind", filamentPreset.Kind.ToString()));
         OrcaTelemetry.WriteDuration.Record(Stopwatch.GetElapsedTime(started).TotalMilliseconds);
@@ -339,4 +339,50 @@ internal sealed class OrcaPresetWriter(
         JsonValueKind.Null => null,
         _ => element.GetRawText()
     };
+
+    private static string SerializeJsonObject(IReadOnlyDictionary<string, object?> values)
+    {
+        using var stream = new MemoryStream();
+        using var writer = new Utf8JsonWriter(stream, new JsonWriterOptions { Indented = true });
+
+        writer.WriteStartObject();
+        foreach (var (key, value) in values)
+        {
+            writer.WritePropertyName(key);
+            WriteJsonValue(writer, value);
+        }
+
+        writer.WriteEndObject();
+        writer.Flush();
+
+        return Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    private static void WriteJsonValue(Utf8JsonWriter writer, object? value)
+    {
+        switch (value)
+        {
+            case null:
+                writer.WriteNullValue();
+                break;
+            case string stringValue:
+                writer.WriteStringValue(stringValue);
+                break;
+            case bool boolValue:
+                writer.WriteBooleanValue(boolValue);
+                break;
+            case IEnumerable<object?> values:
+                writer.WriteStartArray();
+                foreach (var item in values)
+                {
+                    WriteJsonValue(writer, item);
+                }
+
+                writer.WriteEndArray();
+                break;
+            default:
+                writer.WriteStringValue(Convert.ToString(value, CultureInfo.InvariantCulture));
+                break;
+        }
+    }
 }

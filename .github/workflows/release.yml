@@ -44,7 +44,8 @@ jobs:
           --runtime ${{ matrix.runtime }}
           --self-contained true
           -p:PublishSingleFile=true
-          -p:PublishTrimmed=false
+          -p:PublishTrimmed=true
+          -p:TrimMode=partial
           -p:IncludeNativeLibrariesForSelfExtract=true
           -p:DebugType=None
           -p:DebugSymbols=false
@@ -78,10 +79,8 @@ jobs:
           merge-multiple: true
 
       - name: Create release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ github.ref_name }}
-        run: >
-          gh release create "$TAG_NAME" release-assets/*.zip
-          --title "$TAG_NAME"
-          --notes "Self-contained single-file PresetConverter builds. Download the package for your operating system, extract it, and run the PresetConverter executable."
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: release-assets/*.zip
+          body: Self-contained, trimmed, single-file PresetConverter builds. Download the package for your operating system, extract it, and run the PresetConverter executable.

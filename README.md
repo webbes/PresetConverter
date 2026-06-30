@@ -52,7 +52,7 @@ dotnet test PresetConverter.slnx --no-build
 
 ## Downloads
 
-Prebuilt downloads are published through GitHub Releases when a version tag is pushed. Each release contains self-contained single-file packages for:
+Prebuilt downloads are published through GitHub Releases when a version tag is pushed. Each release contains self-contained, trimmed, single-file packages for:
 
 - `win-x64`
 - `linux-x64`
