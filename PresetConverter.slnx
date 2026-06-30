@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="PresetConverter/PresetConverter.csproj" />
+  <Project Path="PresetConverter.Core/PresetConverter.Core.csproj" />
+  <Project Path="PresetConverter.Prusa/PresetConverter.Prusa.csproj" />
+  <Project Path="PresetConverter.Orca/PresetConverter.Orca.csproj" />
+  <Project Path="PresetConverter.Prusa.Tests/PresetConverter.Prusa.Tests.csproj" />
+  <Project Path="PresetConverter.Orca.Tests/PresetConverter.Orca.Tests.csproj" />
+</Solution>
