@@ -50,6 +50,23 @@ dotnet build PresetConverter.slnx
 dotnet test PresetConverter.slnx --no-build
 ```
 
+## Downloads
+
+Prebuilt downloads are published through GitHub Releases when a version tag is pushed. Each release contains self-contained single-file packages for:
+
+- `win-x64`
+- `linux-x64`
+- `osx-x64`
+
+Download the package for your operating system from the repository's Releases page, extract it, and run the `PresetConverter` executable. The app is self-contained, so the .NET runtime does not need to be installed on the target machine.
+
+To publish a new release from this repository:
+
+```powershell
+git tag v0.1.0
+git push origin v0.1.0
+```
+
 ## Run
 
 From the solution root:
